@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Math Game</title>
+  <style>
+    /* General Body and Layout */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+        background: linear-gradient(135deg, #2a0050, #4f007e); /* Deeper, more vibrant gradient */
+        color: #e0e0e0; /* Softer white for text */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* Use min-height to ensure it covers viewport even with less content */
+        margin: 0;
+        overflow: hidden; /* Prevent scrollbars if elements slightly exceed viewport */
+    }
+
+    /* Game Container */
+    .game-container {
+        background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent dark background */
+        border-radius: 15px; /* More rounded corners */
+        padding: 30px 40px; /* Increased padding */
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow for depth */
+        text-align: center;
+        backdrop-filter: blur(5px); /* Frosted glass effect */
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+        max-width: 90%; /* Responsive max width */
+    }
+
+    h1 {
+        font-size: 2.8em; /* Larger title */
+        margin-bottom: 25px;
+        color: #00ffcc; /* Accent color for title */
+        text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); /* Glow effect */
+    }
+
+    /* Game Board */
+    .board {
+        display: grid;
+        /* Responsive grid: changes columns based on screen size */
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 18px; /* Slightly increased gap */
+        justify-content: center;
+        margin-top: 30px;
+        padding: 10px; /* Add some padding around the board */
+        max-width: 600px; /* Limit board width for very large screens */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Individual Cards */
+    .card {
+        background-color: rgba(255, 255, 255, 0.15); /* Lighter semi-transparent for cards */
+        border: 1px solid rgba(255, 255, 255, 0.3); /* Softer border */
+        height: 90px; /* Fixed height for consistent card size */
+        display: flex; /* Use flexbox for centering content */
+        justify-content: center;
+        align-items: center;
+        font-size: 24px; /* Larger text for readability */
+        font-weight: bold;
+        color: #e0e0e0; /* Initial card text color */
+        cursor: pointer;
+        border-radius: 12px; /* More rounded card corners */
+        transition: all 0.3s ease; /* Smooth transition for all properties */
+        user-select: none; /* Prevent text selection */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Card shadow */
+        perspective: 1000px; /* For 3D flip effect */
+        transform-style: preserve-3d;
+    }
+
+    .card:hover:not(.revealed) {
+        background-color: rgba(255, 255, 255, 0.25); /* Subtle hover effect */
+        transform: translateY(-3px); /* Slight lift on hover */
+    }
+
+    /* Revealed Card State */
+    .card.revealed {
+        background-color: #00ffcc; /* Bright accent for revealed cards */
+        color: #1e3c72; /* Darker text on revealed cards for contrast */
+        box-shadow: 0 6px 15px rgba(0, 255, 204, 0.6); /* Stronger glow shadow */
+        transform: rotateY(180deg); /* 3D flip effect */
+        pointer-events: none; /* Disable clicks on revealed cards */
+    }
+
+    /* Card inner content for flip */
+    .card .content {
+        transform: rotateY(180deg); /* Counter-rotate content to appear front-facing */
+        backface-visibility: hidden; /* Hide back of content during flip */
+    }
+
+    /* Game Info Section */
+    .info {
+        margin-top: 30px; /* Increased margin */
+        display: flex;
+        justify-content: space-around; /* Distribute items evenly */
+        align-items: center;
+        flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+        gap: 15px; /* Gap between info items */
+        font-size: 1.2em; /* Larger info text */
+    }
+
+    .info p {
+        margin: 0; /* Remove default paragraph margin */
+        padding: 8px 15px;
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info span {
+        font-weight: bold;
+        color: #00ffcc; /* Accent color for numbers */
+    }
+
+    /* Buttons */
+    button {
+        padding: 12px 25px; /* Larger padding for buttons */
+        border: none;
+        background: #00ffcc; /* Accent color for button */
+        color: #1e3c72; /* Darker text for contrast */
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 8px; /* More rounded corners */
+        margin-top: 15px; /* Increased margin */
+        font-size: 1.1em; /* Larger font size */
+        transition: all 0.3s ease; /* Smooth hover effects */
+        box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4); /* Button shadow */
+    }
+
+    button:hover {
+        background: #00e6b8; /* Slightly darker on hover */
+        transform: translateY(-2px); /* Slight lift */
+        box-shadow: 0 7px 20px rgba(0, 255, 204, 0.6); /* Stronger shadow on hover */
+    }
+
+    button:active {
+        transform: translateY(0); /* Press down effect */
+        box-shadow: 0 3px 10px rgba(0, 255, 204, 0.3);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 600px) {
+        .game-container {
+            padding: 20px 25px;
+        }
+
+        h1 {
+            font-size: 2.2em;
+        }
+
+        .board {
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Smaller cards on small screens */
+            gap: 12px;
+        }
+
+        .card {
+            height: 70px;
+            font-size: 20px;
+        }
+
+        .info {
+            flex-direction: column; /* Stack info items vertically */
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Memory Math Match</h1>
+    <div id="game-board" class="board"></div>
+    <div class="info">
+      <p>Score: <span id="score">0</span></p>
+      <p>Time: <span id="timer">60</span>s</p>
+      <button id="restart">Restart</button>
+    </div>
+  </div>
+  <script>
+    const board = document.getElementById("game-board");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const restartBtn = document.getElementById("restart");
+
+    let cards = [];
+    let firstCard = null;
+    let secondCard = null;
+    let score = 0;
+    let timeLeft = 60;
+    let timer;
+    let level = 1;
+    const maxLevel = 5;
+
+    function generateCards(level) {
+      const baseExpressions = [
+        ["2 + 3", "5"],
+        ["4 x 2", "8"],
+        ["9 - 5", "4"],
+        ["6 / 2", "3"],
+        ["3 x 3", "9"],
+        ["10 - 7", "3"],
+        ["5 + 6", "11"],
+        ["8 / 4", "2"],
+        ["7 + 8", "15"],
+        ["12 / 3", "4"],
+        ["9 x 2", "18"],
+        ["15 - 6", "9"]
+      ];
+
+      // Determine how many pairs to use based on level
+      // Level 1: 4 pairs (8 cards), Level 2: 6 pairs (12 cards), Level 3: 8 pairs (16 cards), etc.
+      const numPairs = 4 + (level - 1) * 2;
+      const pairsToUse = baseExpressions.slice(0, numPairs);
+
+      const paired = [];
+      pairsToUse.forEach(pair => {
+        paired.push({ value: pair[0], match: pair[1], type: "expr" });
+        paired.push({ value: pair[1], match: pair[0], type: "ans" });
+      });
+
+      return shuffle(paired);
+    }
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+      cards = generateCards(level);
+      score = 0;
+      timeLeft = 60 - (level - 1) * 5; // Reduce time for higher levels
+      board.innerHTML = ""; // Clear existing cards
+      scoreDisplay.textContent = score;
+      timerDisplay.textContent = timeLeft;
+      clearInterval(timer); // Clear any existing timer
+      timer = setInterval(updateTimer, 1000); // Start new timer
+
+      cards.forEach((cardData, i) => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.value = cardData.value;
+        card.dataset.match = cardData.match;
+        card.innerHTML = '<div class="content">?</div>'; // Wrap content in a div for flip effect
+        card.addEventListener("click", () => flipCard(card, cardData));
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard(card, cardData) {
+      // Prevent clicking already revealed cards or when two cards are already selected
+      if (card.classList.contains("revealed") || secondCard) return;
+
+      card.querySelector('.content').innerText = cardData.value; // Show card value
+      card.classList.add("revealed");
+
+      if (!firstCard) {
+        firstCard = { card, data: cardData };
+      } else {
+        secondCard = { card, data: cardData };
+        setTimeout(checkMatch, 800); // Check for match after a short delay
+      }
+    }
+
+    function checkMatch() {
+      // Check if the two flipped cards are a matching pair
+      if (
+        firstCard.data.value === secondCard.data.match &&
+        secondCard.data.value === firstCard.data.match
+      ) {
+        score++;
+        scoreDisplay.textContent = score;
+
+        // Check if all cards are revealed (meaning level is complete)
+        const revealed = document.querySelectorAll(".card.revealed").length;
+        if (revealed === cards.length) {
+          nextLevel();
+        }
+      } else {
+        // If no match, flip cards back
+        firstCard.card.classList.remove("revealed");
+        secondCard.card.classList.remove("revealed");
+        firstCard.card.querySelector('.content').innerText = "?";
+        secondCard.card.querySelector('.content').innerText = "?";
+      }
+      firstCard = null; // Reset for next turn
+      secondCard = null;
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+      if (timeLeft === 0) {
+        clearInterval(timer);
+        alert("Time's up! Your score: " + score + " | Level: " + level);
+        level = 1; // Reset level on game over
+        startGame();
+      }
+    }
+
+    function nextLevel() {
+      clearInterval(timer); // Stop timer for current level
+      if (level < maxLevel) {
+        alert("Great! Moving to level " + (level + 1));
+        level++;
+        startGame(); // Start next level
+      } else {
+        alert("🏆 Congratulations! You finished all levels! Final Score: " + score);
+        level = 1; // Reset to level 1 after completing all levels
+        startGame(); // Start a new game from level 1
+      }
+    }
+
+    // Restart button functionality
+    restartBtn.addEventListener("click", () => {
+      level = 1; // Reset level to 1
+      startGame(); // Start a new game
+    });
+
+    // Initialize the game when the page loads
+    startGame();
+  </script>
+</body>
+</html>
