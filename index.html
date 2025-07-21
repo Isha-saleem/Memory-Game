@@ -1,324 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Memory Math Game</title>
-  <style>
-    /* General Body and Layout */
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
-        background: linear-gradient(135deg, #2a0050, #4f007e); /* Deeper, more vibrant gradient */
-        color: #e0e0e0; /* Softer white for text */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh; /* Use min-height to ensure it covers viewport even with less content */
-        margin: 0;
-        overflow: hidden; /* Prevent scrollbars if elements slightly exceed viewport */
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Math Memory Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Body and Layout */
+        body {
+            font-family: 'Open Sans', sans-serif; /* Professional, readable font */
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* Blue, Red, Yellow - Primary colors often associated with learning */
+            color: #f0f0f0; /* Soft white for text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            flex-direction: column; /* Allow stacking of intro/game */
+        }
 
-    /* Game Container */
-    .game-container {
-        background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent dark background */
-        border-radius: 15px; /* More rounded corners */
-        padding: 30px 40px; /* Increased padding */
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow for depth */
-        text-align: center;
-        backdrop-filter: blur(5px); /* Frosted glass effect */
-        border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
-        max-width: 90%; /* Responsive max width */
-    }
+        /* Intro Page Styling */
+        .intro-container {
+            background-color: rgba(255, 255, 255, 0.95); /* Nearly opaque white for clean look */
+            border-radius: 15px;
+            padding: 40px 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            color: #333; /* Dark text for contrast on light background */
+            position: absolute; /* Position over the game */
+            z-index: 10; /* Ensure it's on top */
+            display: flex; /* Initially visible */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-    h1 {
-        font-size: 2.8em; /* Larger title */
-        margin-bottom: 25px;
-        color: #00ffcc; /* Accent color for title */
-        text-shadow: 0 0 10px rgba(0, 255, 204, 0.5); /* Glow effect */
-    }
+        .intro-container h1 {
+            font-family: 'Montserrat', sans-serif; /* Distinctive font for title */
+            font-size: 3.2em;
+            color: #1a2a6c; /* Deep blue */
+            margin-bottom: 20px;
+            text-shadow: none; /* Remove glow for cleaner look */
+        }
 
-    /* Game Board */
-    .board {
-        display: grid;
-        /* Responsive grid: changes columns based on screen size */
-        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-        gap: 18px; /* Slightly increased gap */
-        justify-content: center;
-        margin-top: 30px;
-        padding: 10px; /* Add some padding around the board */
-        max-width: 600px; /* Limit board width for very large screens */
-        margin-left: auto;
-        margin-right: auto;
-    }
+        .intro-container p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #555;
+        }
 
-    /* Individual Cards */
-    .card {
-        background-color: rgba(255, 255, 255, 0.15); /* Lighter semi-transparent for cards */
-        border: 1px solid rgba(255, 255, 255, 0.3); /* Softer border */
-        height: 90px; /* Fixed height for consistent card size */
-        display: flex; /* Use flexbox for centering content */
-        justify-content: center;
-        align-items: center;
-        font-size: 24px; /* Larger text for readability */
-        font-weight: bold;
-        color: #e0e0e0; /* Initial card text color */
-        cursor: pointer;
-        border-radius: 12px; /* More rounded card corners */
-        transition: all 0.3s ease; /* Smooth transition for all properties */
-        user-select: none; /* Prevent text selection */
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Card shadow */
-        perspective: 1000px; /* For 3D flip effect */
-        transform-style: preserve-3d;
-    }
+        .intro-container .start-button {
+            padding: 15px 35px;
+            background: #4CAF50; /* Green for start action */
+            color: white;
+            font-size: 1.3em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
 
-    .card:hover:not(.revealed) {
-        background-color: rgba(255, 255, 255, 0.25); /* Subtle hover effect */
-        transform: translateY(-3px); /* Slight lift on hover */
-    }
+        .intro-container .start-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
 
-    /* Revealed Card State */
-    .card.revealed {
-        background-color: #00ffcc; /* Bright accent for revealed cards */
-        color: #1e3c72; /* Darker text on revealed cards for contrast */
-        box-shadow: 0 6px 15px rgba(0, 255, 204, 0.6); /* Stronger glow shadow */
-        transform: rotateY(180deg); /* 3D flip effect */
-        pointer-events: none; /* Disable clicks on revealed cards */
-    }
+        .intro-container.hidden {
+            display: none; /* Hide when game starts */
+        }
 
-    /* Card inner content for flip */
-    .card .content {
-        transform: rotateY(180deg); /* Counter-rotate content to appear front-facing */
-        backface-visibility: hidden; /* Hide back of content during flip */
-    }
-
-    /* Game Info Section */
-    .info {
-        margin-top: 30px; /* Increased margin */
-        display: flex;
-        justify-content: space-around; /* Distribute items evenly */
-        align-items: center;
-        flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-        gap: 15px; /* Gap between info items */
-        font-size: 1.2em; /* Larger info text */
-    }
-
-    .info p {
-        margin: 0; /* Remove default paragraph margin */
-        padding: 8px 15px;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .info span {
-        font-weight: bold;
-        color: #00ffcc; /* Accent color for numbers */
-    }
-
-    /* Buttons */
-    button {
-        padding: 12px 25px; /* Larger padding for buttons */
-        border: none;
-        background: #00ffcc; /* Accent color for button */
-        color: #1e3c72; /* Darker text for contrast */
-        font-weight: bold;
-        cursor: pointer;
-        border-radius: 8px; /* More rounded corners */
-        margin-top: 15px; /* Increased margin */
-        font-size: 1.1em; /* Larger font size */
-        transition: all 0.3s ease; /* Smooth hover effects */
-        box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4); /* Button shadow */
-    }
-
-    button:hover {
-        background: #00e6b8; /* Slightly darker on hover */
-        transform: translateY(-2px); /* Slight lift */
-        box-shadow: 0 7px 20px rgba(0, 255, 204, 0.6); /* Stronger shadow on hover */
-    }
-
-    button:active {
-        transform: translateY(0); /* Press down effect */
-        box-shadow: 0 3px 10px rgba(0, 255, 204, 0.3);
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 600px) {
+        /* Game Container */
         .game-container {
-            padding: 20px 25px;
+            background-color: rgba(0, 0, 0, 0.6); /* Slightly darker for game */
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 90%;
+            display: none; /* Hidden until game starts */
         }
 
-        h1 {
-            font-size: 2.2em;
+        .game-container.visible {
+            display: block; /* Show when game starts */
         }
 
+        h1.game-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.8em;
+            margin-bottom: 25px;
+            color: #fdbb2d; /* Yellow accent for game title */
+            text-shadow: 0 0 10px rgba(253, 187, 45, 0.5);
+        }
+
+        /* Game Board */
         .board {
-            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Smaller cards on small screens */
-            gap: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 18px;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 10px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
+        /* Individual Cards */
         .card {
-            height: 70px;
-            font-size: 20px;
+            background-color: rgba(255, 255, 255, 0.2); /* Lighter semi-transparent for cards */
+            border: 1px solid rgba(255, 255, 255, 0.4); /* More visible border */
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #f0f0f0; /* Initial card text color */
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            perspective: 1000px;
+            transform-style: preserve-3d;
         }
 
-        .info {
-            flex-direction: column; /* Stack info items vertically */
+        .card:hover:not(.revealed) {
+            background-color: rgba(255, 255, 255, 0.35); /* More pronounced hover */
+            transform: translateY(-5px); /* Stronger lift on hover */
         }
-    }
-  </style>
+
+        /* Revealed Card State */
+        .card.revealed {
+            background-color: #fdbb2d; /* Yellow accent for revealed cards */
+            color: #1a2a6c; /* Dark blue text for contrast */
+            box-shadow: 0 6px 15px rgba(253, 187, 45, 0.6); /* Stronger glow shadow */
+            transform: rotateY(180deg);
+            pointer-events: none;
+        }
+
+        /* Card inner content for flip */
+        .card .content {
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+        }
+
+        /* Game Info Section */
+        .info {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 1.2em;
+        }
+
+        .info p {
+            margin: 0;
+            padding: 8px 15px;
+            background-color: rgba(0, 0, 0, 0.4); /* Slightly darker info background */
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info span {
+            font-weight: bold;
+            color: #fdbb2d; /* Yellow accent for numbers */
+        }
+
+        /* Buttons */
+        button {
+            padding: 12px 25px;
+            border: none;
+            background: #b21f1f; /* Red accent for button */
+            color: white; /* White text for contrast */
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Subtle button shadow */
+        }
+
+        button:hover {
+            background: #9d1b1b; /* Slightly darker on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .game-container, .intro-container {
+                padding: 20px 25px;
+            }
+
+            h1.game-title, .intro-container h1 {
+                font-size: 2.2em;
+            }
+
+            .board {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+                gap: 12px;
+            }
+
+            .card {
+                height: 70px;
+                font-size: 20px;
+            }
+
+            .info {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    <h1>Memory Math Match</h1>
-    <div id="game-board" class="board"></div>
-    <div class="info">
-      <p>Score: <span id="score">0</span></p>
-      <p>Time: <span id="timer">60</span>s</p>
-      <button id="restart">Restart</button>
+    <div id="intro-page" class="intro-container">
+        <h1>Math Memory Challenge</h1>
+        <p>Welcome to the Math Memory Challenge! Test your arithmetic and memory skills by matching equations with their correct answers. Flip two cards, find a pair, and clear the board to advance to the next level. The faster you are, the better your score!</p>
+        <button class="start-button" id="start-game-btn">Start Game</button>
     </div>
-  </div>
-  <script>
-    const board = document.getElementById("game-board");
-    const scoreDisplay = document.getElementById("score");
-    const timerDisplay = document.getElementById("timer");
-    const restartBtn = document.getElementById("restart");
 
-    let cards = [];
-    let firstCard = null;
-    let secondCard = null;
-    let score = 0;
-    let timeLeft = 60;
-    let timer;
-    let level = 1;
-    const maxLevel = 5;
+    <div class="game-container" id="game-page">
+        <h1 class="game-title">Math Memory Challenge</h1>
+        <div id="game-board" class="board"></div>
+        <div class="info">
+            <p>Score: <span id="score">0</span></p>
+            <p>Time: <span id="timer">60</span>s</p>
+            <button id="restart">Restart</button>
+        </div>
+    </div>
+    <script>
+        const board = document.getElementById("game-board");
+        const scoreDisplay = document.getElementById("score");
+        const timerDisplay = document.getElementById("timer");
+        const restartBtn = document.getElementById("restart");
+        const introPage = document.getElementById("intro-page");
+        const gamePage = document.getElementById("game-page");
+        const startGameBtn = document.getElementById("start-game-btn");
 
-    function generateCards(level) {
-      const baseExpressions = [
-        ["2 + 3", "5"],
-        ["4 x 2", "8"],
-        ["9 - 5", "4"],
-        ["6 / 2", "3"],
-        ["3 x 3", "9"],
-        ["10 - 7", "3"],
-        ["5 + 6", "11"],
-        ["8 / 4", "2"],
-        ["7 + 8", "15"],
-        ["12 / 3", "4"],
-        ["9 x 2", "18"],
-        ["15 - 6", "9"]
-      ];
+        let cards = [];
+        let firstCard = null;
+        let secondCard = null;
+        let score = 0;
+        let timeLeft = 60;
+        let timer;
+        let level = 1;
+        const maxLevel = 5;
 
-      // Determine how many pairs to use based on level
-      // Level 1: 4 pairs (8 cards), Level 2: 6 pairs (12 cards), Level 3: 8 pairs (16 cards), etc.
-      const numPairs = 4 + (level - 1) * 2;
-      const pairsToUse = baseExpressions.slice(0, numPairs);
+        function generateCards(level) {
+            const baseExpressions = [
+                ["2 + 3", "5"],
+                ["4 x 2", "8"],
+                ["9 - 5", "4"],
+                ["6 / 2", "3"],
+                ["3 x 3", "9"],
+                ["10 - 7", "3"],
+                ["5 + 6", "11"],
+                ["8 / 4", "2"],
+                ["7 + 8", "15"],
+                ["12 / 3", "4"],
+                ["9 x 2", "18"],
+                ["15 - 6", "9"],
+                ["7 x 3", "21"],
+                ["20 / 5", "4"],
+                ["18 + 7", "25"],
+                ["22 - 10", "12"]
+            ];
 
-      const paired = [];
-      pairsToUse.forEach(pair => {
-        paired.push({ value: pair[0], match: pair[1], type: "expr" });
-        paired.push({ value: pair[1], match: pair[0], type: "ans" });
-      });
+            // Determine how many pairs to use based on level
+            const numPairs = 4 + (level - 1) * 2; // Level 1: 4 pairs (8 cards), Level 2: 6 pairs (12 cards), etc.
+            const pairsToUse = baseExpressions.slice(0, numPairs);
 
-      return shuffle(paired);
-    }
+            const paired = [];
+            pairsToUse.forEach(pair => {
+                paired.push({ value: pair[0], match: pair[1], type: "expr" });
+                paired.push({ value: pair[1], match: pair[0], type: "ans" });
+            });
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
-
-    function startGame() {
-      cards = generateCards(level);
-      score = 0;
-      timeLeft = 60 - (level - 1) * 5; // Reduce time for higher levels
-      board.innerHTML = ""; // Clear existing cards
-      scoreDisplay.textContent = score;
-      timerDisplay.textContent = timeLeft;
-      clearInterval(timer); // Clear any existing timer
-      timer = setInterval(updateTimer, 1000); // Start new timer
-
-      cards.forEach((cardData, i) => {
-        const card = document.createElement("div");
-        card.classList.add("card");
-        card.dataset.value = cardData.value;
-        card.dataset.match = cardData.match;
-        card.innerHTML = '<div class="content">?</div>'; // Wrap content in a div for flip effect
-        card.addEventListener("click", () => flipCard(card, cardData));
-        board.appendChild(card);
-      });
-    }
-
-    function flipCard(card, cardData) {
-      // Prevent clicking already revealed cards or when two cards are already selected
-      if (card.classList.contains("revealed") || secondCard) return;
-
-      card.querySelector('.content').innerText = cardData.value; // Show card value
-      card.classList.add("revealed");
-
-      if (!firstCard) {
-        firstCard = { card, data: cardData };
-      } else {
-        secondCard = { card, data: cardData };
-        setTimeout(checkMatch, 800); // Check for match after a short delay
-      }
-    }
-
-    function checkMatch() {
-      // Check if the two flipped cards are a matching pair
-      if (
-        firstCard.data.value === secondCard.data.match &&
-        secondCard.data.value === firstCard.data.match
-      ) {
-        score++;
-        scoreDisplay.textContent = score;
-
-        // Check if all cards are revealed (meaning level is complete)
-        const revealed = document.querySelectorAll(".card.revealed").length;
-        if (revealed === cards.length) {
-          nextLevel();
+            return shuffle(paired);
         }
-      } else {
-        // If no match, flip cards back
-        firstCard.card.classList.remove("revealed");
-        secondCard.card.classList.remove("revealed");
-        firstCard.card.querySelector('.content').innerText = "?";
-        secondCard.card.querySelector('.content').innerText = "?";
-      }
-      firstCard = null; // Reset for next turn
-      secondCard = null;
-    }
 
-    function updateTimer() {
-      timeLeft--;
-      timerDisplay.textContent = timeLeft;
-      if (timeLeft === 0) {
-        clearInterval(timer);
-        alert("Time's up! Your score: " + score + " | Level: " + level);
-        level = 1; // Reset level on game over
-        startGame();
-      }
-    }
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
 
-    function nextLevel() {
-      clearInterval(timer); // Stop timer for current level
-      if (level < maxLevel) {
-        alert("Great! Moving to level " + (level + 1));
-        level++;
-        startGame(); // Start next level
-      } else {
-        alert("🏆 Congratulations! You finished all levels! Final Score: " + score);
-        level = 1; // Reset to level 1 after completing all levels
-        startGame(); // Start a new game from level 1
-      }
-    }
+        function startGame() {
+            cards = generateCards(level);
+            score = 0;
+            timeLeft = 60 - (level - 1) * 5; // Reduce time for higher levels
+            board.innerHTML = ""; // Clear existing cards
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft;
+            clearInterval(timer); // Clear any existing timer
+            timer = setInterval(updateTimer, 1000); // Start new timer
 
-    // Restart button functionality
-    restartBtn.addEventListener("click", () => {
-      level = 1; // Reset level to 1
-      startGame(); // Start a new game
-    });
+            // Adjust grid columns based on number of cards for better layout
+            const numCards = cards.length;
+            let gridColumns = "repeat(auto-fit, minmax(90px, 1fr))";
+            if (numCards <= 8) { // For 4 pairs
+                gridColumns = "repeat(4, 1fr)";
+            } else if (numCards <= 12) { // For 6 pairs
+                gridColumns = "repeat(4, 1fr)";
+            } else if (numCards <= 16) { // For 8 pairs
+                gridColumns = "repeat(4, 1fr)";
+            } else if (numCards <= 20) { // For 10 pairs
+                 gridColumns = "repeat(5, 1fr)";
+            }
+            board.style.gridTemplateColumns = gridColumns;
 
-    // Initialize the game when the page loads
-    startGame();
-  </script>
+
+            cards.forEach((cardData, i) => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.value = cardData.value;
+                card.dataset.match = cardData.match;
+                card.innerHTML = '<div class="content">?</div>';
+                card.addEventListener("click", () => flipCard(card, cardData));
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard(card, cardData) {
+            if (card.classList.contains("revealed") || secondCard) return;
+
+            card.querySelector('.content').innerText = cardData.value;
+            card.classList.add("revealed");
+
+            if (!firstCard) {
+                firstCard = { card, data: cardData };
+            } else {
+                secondCard = { card, data: cardData };
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            if (
+                firstCard.data.value === secondCard.data.match &&
+                secondCard.data.value === firstCard.data.match
+            ) {
+                score++;
+                scoreDisplay.textContent = score;
+
+                const revealed = document.querySelectorAll(".card.revealed").length;
+                if (revealed === cards.length) {
+                    nextLevel();
+                }
+            } else {
+                firstCard.card.classList.remove("revealed");
+                secondCard.card.classList.remove("revealed");
+                firstCard.card.querySelector('.content').innerText = "?";
+                secondCard.card.querySelector('.content').innerText = "?";
+            }
+            firstCard = null;
+            secondCard = null;
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) { // Changed to <= 0 to ensure it triggers at 0
+                clearInterval(timer);
+                alert("Time's up! Your score: " + score + " | Level: " + level);
+                level = 1; // Reset level on game over
+                startGame();
+            }
+        }
+
+        function nextLevel() {
+            clearInterval(timer);
+            if (level < maxLevel) {
+                alert("Great! Moving to level " + (level + 1));
+                level++;
+                startGame();
+            } else {
+                alert("🏆 Congratulations! You finished all levels! Final Score: " + score);
+                level = 1;
+                startGame();
+            }
+        }
+
+        restartBtn.addEventListener("click", () => {
+            level = 1;
+            startGame();
+        });
+
+        startGameBtn.addEventListener("click", () => {
+            introPage.classList.add("hidden");
+            gamePage.classList.add("visible");
+            startGame(); // Start the game after the intro is dismissed
+        });
+
+        // Initialize with the intro page visible
+        introPage.classList.remove("hidden");
+        gamePage.classList.remove("visible"); // Ensure game page is hidden initially
+    </script>
 </body>
 </html>
